@@ -17,6 +17,7 @@ class MmapCommunication(BaseCommunication):
     layout matches MATLAB's native format.
 
     Each channel maps to a separate file on disk:
+        - ``flag_path``     : uint8,   shape ``(1,)``  — synchronisation flag
         - ``image_path``    : uint8,   shape ``(H, W, C)``
         - ``position_path`` : float64, shape ``(position_dim,)``
         - ``event_path``    : float64, shape ``(event_dim,)``
@@ -25,6 +26,7 @@ class MmapCommunication(BaseCommunication):
 
     def __init__(
         self,
+        flag_path: str | Path,
         image_path: str | Path,
         position_path: str | Path,
         event_path: str | Path,
@@ -36,16 +38,29 @@ class MmapCommunication(BaseCommunication):
         mode: str = "r+",
     ) -> None:
         super().__init__(image_shape, position_dim, event_dim, action_dim)
+        self._flag_path = Path(flag_path)
         self._image_path = Path(image_path)
         self._position_path = Path(position_path)
         self._event_path = Path(event_path)
         self._action_path = Path(action_path)
         self._mode = mode
 
+        self._flag_mmap: np.memmap | None = None
         self._image_mmap: np.memmap | None = None
         self._position_mmap: np.memmap | None = None
         self._event_mmap: np.memmap | None = None
         self._action_mmap: np.memmap | None = None
+
+    # ------------------------------------------------------------------
+    # Flag
+    # ------------------------------------------------------------------
+
+    def read_flag(self) -> int:
+        return int(self._flag_mmap[0])
+
+    def write_flag(self) -> None:
+        self._flag_mmap[0] = np.uint8(0)
+        self._flag_mmap.flush()
 
     # ------------------------------------------------------------------
     # Read
@@ -75,6 +90,12 @@ class MmapCommunication(BaseCommunication):
     def open(self) -> None:
         if self._is_open:
             return
+        self._flag_mmap = np.memmap(
+            self._flag_path,
+            dtype=np.uint8,
+            mode="r+",
+            shape=(1,),
+        )
         self._image_mmap = np.memmap(
             self._image_path,
             dtype=np.uint8,
@@ -107,10 +128,11 @@ class MmapCommunication(BaseCommunication):
 
     def close(self) -> None:
         attrs = (
+            "_flag_mmap",
             "_image_mmap",
             "_position_mmap",
             "_event_mmap",
-            "_action_mmap"
+            "_action_mmap",
             )
         if not self._is_open:
             return

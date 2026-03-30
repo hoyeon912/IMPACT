@@ -21,6 +21,10 @@ class BaseCommunication(ABC):
 
     Data channel (Python -> VirMEn):
         action   : float64 array, shape ``(action_dim,)``
+
+    Synchronisation flag (shared, single uint8):
+        0 — Python has written; VirMEn may proceed.
+        1 — VirMEn has written; Python may proceed.
     """
 
     def __init__(
@@ -35,6 +39,23 @@ class BaseCommunication(ABC):
         self.event_dim = event_dim
         self.action_dim = action_dim
         self._is_open = False
+
+    # ------------------------------------------------------------------
+    # Flag
+    # ------------------------------------------------------------------
+
+    @abstractmethod
+    def read_flag(self) -> int:
+        """Read the synchronisation flag.
+
+        Returns:
+            0 if Python has written (VirMEn's turn),
+            1 if VirMEn has written (Python's turn).
+        """
+
+    @abstractmethod
+    def write_flag(self, value: int) -> None:
+        """Set the synchronisation flag to *value* (0 or 1)."""
 
     # ------------------------------------------------------------------
     # Read: VirMEn -> Python
