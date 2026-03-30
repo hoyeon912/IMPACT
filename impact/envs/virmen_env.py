@@ -94,13 +94,13 @@ class VirMEnEnv(gymnasium.Env):
         self._step_count += 1
 
         obs = self._get_obs()
-        position = self.comm.read_position()
-        event = self.comm.read_event()
+        info = self._get_info()
+        position = info["position"]
+        event = info["event"]
 
         reward = self._compute_reward(obs, position, event, action)
         terminated = self._check_terminated(event)
         truncated = self._step_count >= self.max_steps
-        info = {"position": position, "event": event}
 
         return obs, reward, terminated, truncated, info
 
