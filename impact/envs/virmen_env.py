@@ -142,6 +142,51 @@ class VirMEnEnv(gymnasium.Env):
         """Check whether the episode has terminated. Override in subclasses."""
         return False
 
+    def _process_event(self, event: np.ndarray) -> None:
+        """Process the event array by dispatching each event code.
+
+        Override individual ``_on_*`` handlers in subclasses to implement
+        task-specific event logic.
+
+        Args:
+            event: float64 array of shape ``(event_dim,)`` from VirMEn.
+
+        Returns:
+            Dict mapping event names to their processed results.
+        """
+        code = int(event[0]) if len(event) > 0 else -1
+
+        if code == 0:
+            self._on_trial_start(event)
+        elif code == 1:
+            self._on_trial_end(event)
+        elif code == 2:
+            self._on_reward(event)
+        elif code == 3:
+            self._on_shock(event)
+        elif code == 4:
+            self._on_cue_onset(event)
+
+    def _on_trial_start(self, event: np.ndarray) -> Any:
+        """Handle trial start event (code 1). Override in subclasses."""
+        pass
+
+    def _on_trial_end(self, event: np.ndarray) -> Any:
+        """Handle trial end event (code 2). Override in subclasses."""
+        pass
+
+    def _on_reward(self, event: np.ndarray) -> Any:
+        """Handle reward event (code 3). Override in subclasses."""
+        pass
+
+    def _on_shock(self, event: np.ndarray) -> Any:
+        """Handle shock event (code 4). Override in subclasses."""
+        pass
+
+    def _on_cue_onset(self, event: np.ndarray) -> Any:
+        """Handle cue onset event (code 5). Override in subclasses."""
+        pass
+
 
 # ------------------------------------------------------------------
 # Gymnasium registration
