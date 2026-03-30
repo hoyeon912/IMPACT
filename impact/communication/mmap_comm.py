@@ -106,9 +106,15 @@ class MmapCommunication(BaseCommunication):
         self._is_open = True
 
     def close(self) -> None:
+        attrs = (
+            "_image_mmap",
+            "_position_mmap",
+            "_event_mmap",
+            "_action_mmap"
+            )
         if not self._is_open:
             return
-        for attr in ("_image_mmap", "_position_mmap", "_event_mmap", "_action_mmap"):
+        for attr in attrs:
             mmap = getattr(self, attr, None)
             if mmap is not None:
                 del mmap

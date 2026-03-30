@@ -42,15 +42,24 @@ class BaseCommunication(ABC):
 
     @abstractmethod
     def read_image(self) -> np.ndarray:
-        """Read the current image frame. Returns a copy, shape ``(H, W, C)``, dtype uint8."""
+        """
+        Read the current image frame.
+        Returns a copy, shape ``(H, W, C)``, dtype uint8.
+        """
 
     @abstractmethod
     def read_position(self) -> np.ndarray:
-        """Read the current position vector. Returns a copy, shape ``(position_dim,)``, dtype float64."""
+        """
+        Read the current position vector.
+        Returns a copy, shape ``(position_dim,)``, dtype float64.
+        """
 
     @abstractmethod
     def read_event(self) -> np.ndarray:
-        """Read the current event flags. Returns a copy, shape ``(event_dim,)``, dtype float64."""
+        """
+        Read the current event flags.
+        Returns a copy, shape ``(event_dim,)``, dtype float64.
+        """
 
     def read_all(self) -> dict[str, np.ndarray]:
         """Read all channels at once.
@@ -70,7 +79,10 @@ class BaseCommunication(ABC):
 
     @abstractmethod
     def write_action(self, action: np.ndarray) -> None:
-        """Write an action array back to VirMEn. Shape ``(action_dim,)``, dtype float64."""
+        """
+        Write an action array back to VirMEn.
+        Shape ``(action_dim,)``, dtype float64.
+        """
 
     # ------------------------------------------------------------------
     # Lifecycle

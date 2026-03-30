@@ -89,7 +89,10 @@ class ShmCommunication(BaseCommunication):
             order="F",
         )
 
-        self._position_shm = SharedMemory(name=self._position_name, create=False)
+        self._position_shm = SharedMemory(
+                name=self._position_name,
+                create=False
+                )
         self._position_array = np.ndarray(
             (self.position_dim,),
             dtype=np.float64,
@@ -116,9 +119,10 @@ class ShmCommunication(BaseCommunication):
         self._is_open = True
 
     def close(self) -> None:
+        attrs = ("_image_shm", "_position_shm", "_event_shm", "_action_shm")
         if not self._is_open:
             return
-        for attr in ("_image_shm", "_position_shm", "_event_shm", "_action_shm"):
+        for attr in attrs:
             shm = getattr(self, attr, None)
             if shm is not None:
                 shm.close()
