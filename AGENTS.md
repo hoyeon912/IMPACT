@@ -59,6 +59,7 @@ This repository uses two permanent teams.
 
 ### Analyzer
 - Review `AGENTS.md`, `HOOKS.md`, and `docs/` after completed Code Revise cycles.
+- Always be called when a document is being edited.
 - Focus on missing or weak rules around:
   - IPC contracts
   - synchronization semantics
@@ -79,6 +80,7 @@ This repository uses two permanent teams.
 
 ### Writer
 - Update `AGENTS.md`, `HOOKS.md`, and `docs/` from Summarizer output.
+- Handle all document edits through the Rule Maker workflow.
 - Write concise, enforceable rules only.
 - Do not change workflow semantics without Analyzer justification and Reviewer-style approval.
 
@@ -95,6 +97,7 @@ This repository uses two permanent teams.
 9. Repeat until the Tester plan is approved.
 10. Tester performs validation and writes a Test Summary.
 11. Rule Maker runs after completed Code Revise cycles when repeated process failures, ambiguous contracts, or missing validation requirements were exposed.
+12. Any edit to `AGENTS.md`, `HOOKS.md`, or files in `docs/` must call the Rule Maker team.
 
 ## Required Output Sections
 
@@ -110,6 +113,7 @@ Use these headings when applicable:
 
 ## Repo-Specific Enforcement Rules
 
+- Prefer building the smallest useful function first, then compose small units into larger behavior.
 - Any change to `BaseCommunication` requires explicit compatibility handling for both `MmapCommunication` and `ShmCommunication`.
 - Any change to image, position, event, or action buffers must state dtype, shape, and memory-order impact.
 - Any plan touching synchronization must address the current `write_flag(...)` contract drift documented in `docs/interfaces.md`.
@@ -124,4 +128,3 @@ Work is not complete until:
 - the implementation was summarized
 - the Tester plan was approved
 - the validation was summarized
-

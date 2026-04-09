@@ -11,6 +11,8 @@ Do not merge those categories into a single claim.
 
 ## Required Offline Coverage
 
+- Prefer implementations that keep smaller units independently testable offline before they are assembled into larger flows.
+
 ### For Environment Changes
 
 - Use a fake `BaseCommunication` implementation.
@@ -74,6 +76,7 @@ Mark these as `requires live MATLAB/VirMEn`.
 
 For changes limited to `AGENTS.md`, `HOOKS.md`, or `docs/`:
 
+- verify the Rule Maker team was used for the document edit
 - verify all required governance files exist
 - verify cross-document consistency
 - verify commands in `HOOKS.md` match the current repo reality

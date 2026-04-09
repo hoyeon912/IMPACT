@@ -32,6 +32,11 @@ IMPACT is a small Python package that exposes a Gymnasium-compatible environment
   - Gymnasium API surface
 - Public exports own the package API surface seen by downstream users.
 
+## Preferred Implementation Style
+
+- Build the smallest useful function first.
+- Compose small focused units into larger behavior instead of starting with one large monolithic function.
+
 ## External Contract Boundary
 
 - MATLAB and VirMEn are external systems.
@@ -43,4 +48,3 @@ IMPACT is a small Python package that exposes a Gymnasium-compatible environment
 - Synchronization is documented in the communication layer but is not enforced by `VirMEnEnv` during `reset()` or `step()`.
 - Event dispatch helpers exist in `VirMEnEnv`, but event processing is not currently invoked from `step()`.
 - The abstract `write_flag(value)` signature and concrete backend implementations are currently inconsistent.
-

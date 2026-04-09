@@ -30,9 +30,11 @@ python3 -c "import impact; print(impact.__version__)"
 ## Validation Hooks By Change Type
 
 - Docs-only governance changes:
+  - call the Rule Maker team
   - confirm required files exist
   - confirm cross-document consistency
   - run syntax smoke only if code files changed
+- For code changes, prefer plans that introduce small focused functions before larger orchestration code.
 
 - `impact/envs/virmen_env.py` changes:
   - validate Gymnasium API behavior with a fake communication backend
@@ -63,4 +65,3 @@ python3 -c "import impact; print(impact.__version__)"
   - real producer-consumer synchronization timing
   - MATLAB-owned shared-memory lifecycle
   - VirMEn-generated event semantics
-
