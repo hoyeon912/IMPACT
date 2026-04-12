@@ -54,7 +54,7 @@ class BaseCommunication(ABC):
         """
 
     @abstractmethod
-    def write_flag(self, value: int) -> None:
+    def write_flag(self) -> None:
         """Set the synchronisation flag to *value* (0 or 1)."""
 
     # ------------------------------------------------------------------
@@ -99,7 +99,7 @@ class BaseCommunication(ABC):
     # ------------------------------------------------------------------
 
     @abstractmethod
-    def write_action(self, action: np.ndarray) -> None:
+    def write_action(self, action: int | np.ndarray) -> None:
         """
         Write an action array back to VirMEn.
         Shape ``(action_dim,)``, dtype float64.

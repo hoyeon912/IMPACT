@@ -6,8 +6,10 @@ from typing import Any
 
 import gymnasium
 import numpy as np
+import json
 
 from impact.communication.base_comm import BaseCommunication
+from impact.communication.mmap_comm import MmapCommunication
 
 
 class VirMEnEnv(gymnasium.Env):
@@ -27,6 +29,11 @@ class VirMEnEnv(gymnasium.Env):
     """
 
     metadata: dict[str, Any] = {"render_modes": ["human", "rgb_array"]}
+    TRIAL_ON = 0
+    STIMULUS_ON = 1
+    REWARD_ON = 2
+    SHOCK_ON = 3
+    TRIAL_END = 4
 
     def __init__(
         self,
@@ -90,16 +97,14 @@ class VirMEnEnv(gymnasium.Env):
         self,
         action: np.ndarray,
     ) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
-        self.comm.write_action(np.asarray(action, dtype=np.float64))
+        self.comm.write_action(np.asarray(action, dtype=np.uint8))
         self._step_count += 1
 
         obs = self._get_obs()
         info = self._get_info()
-        position = info["position"]
-        event = info["event"]
 
-        reward = self._compute_reward(obs, position, event, action)
-        terminated = self._check_terminated(event)
+        reward = self._compute_reward(action, info["event"])
+        terminated = self._check_terminated(info["event"])
         truncated = self._step_count >= self.max_steps
 
         return obs, reward, terminated, truncated, info
@@ -129,12 +134,9 @@ class VirMEnEnv(gymnasium.Env):
         }
 
     def _compute_reward(
-        self,
-        obs: np.ndarray,
-        position: np.ndarray,
-        event: np.ndarray,
-        action: np.ndarray,
-    ) -> float:
+            self,
+            action: int | np.ndarray,
+            event: np.ndarray) -> float:
         """Compute the scalar reward. Override in subclasses."""
         return 0.0
 
@@ -142,56 +144,51 @@ class VirMEnEnv(gymnasium.Env):
         """Check whether the episode has terminated. Override in subclasses."""
         return False
 
-    def _process_event(self, event: np.ndarray) -> None:
-        """Process the event array by dispatching each event code.
 
-        Override individual ``_on_*`` handlers in subclasses to implement
-        task-specific event logic.
+class OpenLoop1D(VirMEnEnv):
+    """1D open-loop VirMEn environment with stop/lick actions."""
 
-        Args:
-            event: float64 array of shape ``(event_dim,)`` from VirMEn.
+    STOP_ACTION = 0
+    LICK_ACTION = 1
 
-        Returns:
-            Dict mapping event names to their processed results.
-        """
-        code = int(event[0]) if len(event) > 0 else -1
+    def __init__(
+        self,
+        comm: MmapCommunication,
+        obs_type: str = "image",
+        render_mode: str | None = None,
+        max_steps: int = 1000,
+        setting_path: str = "setting.json",
+    ) -> None:
+        super().__init__(
+            comm=comm,
+            obs_type=obs_type,
+            render_mode=render_mode,
+            max_steps=max_steps,
+        )
+        self.action_space = gymnasium.spaces.Discrete(2)
+        self._read_setting(setting_path)
 
-        if code == 0:
-            self._on_trial_start(event)
-        elif code == 1:
-            self._on_trial_end(event)
-        elif code == 2:
-            self._on_reward(event)
-        elif code == 3:
-            self._on_shock(event)
-        elif code == 4:
-            self._on_cue_onset(event)
+    def _compute_reward(
+            self,
+            action: int | np.ndarray,
+            event: np.ndarray
+            ) -> float:
+        if event[0] == self.REWARD_ON and action == self.LICK_ACTION:
+            return self._reward_value
+        else:
+            return self._action_cost[action]
 
-    def _on_trial_start(self, event: np.ndarray) -> Any:
-        """Handle trial start event (code 1). Override in subclasses."""
-        pass
-
-    def _on_trial_end(self, event: np.ndarray) -> Any:
-        """Handle trial end event (code 2). Override in subclasses."""
-        pass
-
-    def _on_reward(self, event: np.ndarray) -> Any:
-        """Handle reward event (code 3). Override in subclasses."""
-        pass
-
-    def _on_shock(self, event: np.ndarray) -> Any:
-        """Handle shock event (code 4). Override in subclasses."""
-        pass
-
-    def _on_cue_onset(self, event: np.ndarray) -> Any:
-        """Handle cue onset event (code 5). Override in subclasses."""
-        pass
+    def _read_setting(self, fpath: str) -> None:
+        with open(fpath, "r") as f:
+            settings = json.load(f)
+            self._reward_value = settings.get("reward_value", 0.0)
+            self._action_cost = settings.get("action_cost", [0.0, 0.0])
 
 
 # ------------------------------------------------------------------
 # Gymnasium registration
 # ------------------------------------------------------------------
 gymnasium.register(
-    id="impact/VirMEn-v0",
-    entry_point="impact.envs.virmen_env:VirMEnEnv",
+    id="impact/OpenLoop1D-v0",
+    entry_point="impact.envs.virmen_env:OpenLoop1D",
 )

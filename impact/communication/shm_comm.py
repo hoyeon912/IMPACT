@@ -65,8 +65,8 @@ class ShmCommunication(BaseCommunication):
     def read_flag(self) -> int:
         return int(self._flag_array[0])
 
-    def write_flag(self) -> None:
-        self._flag_array[0] = np.uint8(0)
+    def write_flag(self, value: int) -> None:
+        self._flag_array[0] = np.uint8(value)
 
     # ------------------------------------------------------------------
     # Read
@@ -112,9 +112,9 @@ class ShmCommunication(BaseCommunication):
         )
 
         self._position_shm = SharedMemory(
-                name=self._position_name,
-                create=False
-                )
+            name=self._position_name,
+            create=False,
+        )
         self._position_array = np.ndarray(
             (self.position_dim,),
             dtype=np.float64,
@@ -141,7 +141,13 @@ class ShmCommunication(BaseCommunication):
         self._is_open = True
 
     def close(self) -> None:
-        attrs = ("_flag_shm", "_image_shm", "_position_shm", "_event_shm", "_action_shm")
+        attrs = (
+            "_flag_shm",
+            "_image_shm",
+            "_position_shm",
+            "_event_shm",
+            "_action_shm",
+        )
         if not self._is_open:
             return
         for attr in attrs:

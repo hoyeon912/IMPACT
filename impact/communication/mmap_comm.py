@@ -45,11 +45,11 @@ class MmapCommunication(BaseCommunication):
         self._action_path = Path(action_path)
         self._mode = mode
 
-        self._flag_mmap: np.memmap | None = None
-        self._image_mmap: np.memmap | None = None
-        self._position_mmap: np.memmap | None = None
-        self._event_mmap: np.memmap | None = None
-        self._action_mmap: np.memmap | None = None
+        self._flag_mmap: np.memmap
+        self._image_mmap: np.memmap
+        self._position_mmap: np.memmap
+        self._event_mmap: np.memmap
+        self._action_mmap: np.memmap
 
     # ------------------------------------------------------------------
     # Flag
@@ -79,7 +79,7 @@ class MmapCommunication(BaseCommunication):
     # Write
     # ------------------------------------------------------------------
 
-    def write_action(self, action: np.ndarray) -> None:
+    def write_action(self, action: int | np.ndarray) -> None:
         self._action_mmap[:] = np.asarray(action, dtype=np.float64)
         self._action_mmap.flush()
 
@@ -99,28 +99,28 @@ class MmapCommunication(BaseCommunication):
         self._image_mmap = np.memmap(
             self._image_path,
             dtype=np.uint8,
-            mode=self._mode,
+            mode="r",
             shape=self.image_shape,
             order="F",
         )
         self._position_mmap = np.memmap(
             self._position_path,
             dtype=np.float64,
-            mode=self._mode,
+            mode="r",
             shape=(self.position_dim,),
             order="F",
         )
         self._event_mmap = np.memmap(
             self._event_path,
             dtype=np.float64,
-            mode=self._mode,
+            mode="r",
             shape=(self.event_dim,),
             order="F",
         )
         self._action_mmap = np.memmap(
             self._action_path,
             dtype=np.float64,
-            mode="r+",
+            mode="w+",
             shape=(self.action_dim,),
             order="F",
         )
@@ -133,7 +133,7 @@ class MmapCommunication(BaseCommunication):
             "_position_mmap",
             "_event_mmap",
             "_action_mmap",
-            )
+        )
         if not self._is_open:
             return
         for attr in attrs:
