@@ -45,11 +45,7 @@ class MmapCommunication(BaseCommunication):
         self._action_path = Path(action_path)
         self._mode = mode
 
-        self._flag_mmap: np.memmap
-        self._image_mmap: np.memmap
-        self._position_mmap: np.memmap
-        self._event_mmap: np.memmap
-        self._action_mmap: np.memmap
+        self.open()
 
     # ------------------------------------------------------------------
     # Flag
@@ -112,14 +108,14 @@ class MmapCommunication(BaseCommunication):
         )
         self._event_mmap = np.memmap(
             self._event_path,
-            dtype=np.float64,
+            dtype=np.uint8,
             mode="r",
             shape=(self.event_dim,),
             order="F",
         )
         self._action_mmap = np.memmap(
             self._action_path,
-            dtype=np.float64,
+            dtype=np.uint8,
             mode="w+",
             shape=(self.action_dim,),
             order="F",
